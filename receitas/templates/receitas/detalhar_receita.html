@@ -1,0 +1,140 @@
+{% extends 'core/base.html' %}
+{% block content_title %}{{ content_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="width: 100%; padding-right: 0;">
+  <div class="card border-0 shadow-sm" style="border-radius: 0; box-shadow: none; background: #fff;">
+    <div class="card-body p-0">
+      <!-- Cabeçalho com Nome e Foto -->
+      <div class="row mb-4 align-items-center" style="border-bottom: 1px solid #ddd; padding: 15px;">
+        <div class="col-md-8">
+          <h4 class="text-uppercase fw-bold" style="color: #000; font-size: 1.5rem; margin-bottom: 0.5rem;">Nome da Preparação: {{ receita.nome }}</h4>
+          <p style="color: #555; font-size: 1rem; margin-bottom: 0;">Profissional: {{ receita.profissional|default:"Não especificado" }}</p>
+        </div>
+        <div class="col-md-4 text-center">
+          {% if receita.foto %}
+          <img src="{{ receita.foto.url }}" alt="{{ receita.nome }}" class="img-fluid" style="max-height: 150px; border: 1px solid #ddd;">
+          {% else %}
+          <div class="placeholder-img" style="background: #ddd; height: 150px; line-height: 150px; text-align: center; color: #888;">Foto do Prato</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Tabela de Insumos -->
+      <h6 class="text-uppercase mb-3 fw-bold" style="color: #fff; background: #28a745; padding: 8px; font-size: 1.1rem; text-align: center;">Insumos</h6>
+      {% if itens_com_custo %}
+      <table class="table table-bordered table-hover" style="color: #000; font-size: 0.95rem;">
+        <thead style="background: #28a745; color: #fff;">
+          <tr>
+            <th>ITEM</th>
+            <th>UN</th>
+            <th>Peso Bruto</th>
+            <th>Peso Líquido</th>
+            <th>Fator Correção</th>
+            <th>Valor Unitário</th>
+            <th>Valor Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in itens_com_custo %}
+          <tr>
+            <td>{{ item.ingrediente }}</td>
+            <td>{{ item.unidade }}</td>
+            <td>{{ item.quantidade_bruta|default:item.quantidade }}</td>
+            <td>{{ item.quantidade_liquida|default:item.quantidade }}</td>
+            <td>{{ item.fator_correcao|default:"1.000" }}</td>
+            <td>R$ {{ item.valor_unitario|floatformat:2 }}</td>
+            <td>R$ {{ item.custo|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot style="background: #f8f9fa; font-weight: bold;">
+          <tr>
+            <td colspan="6">Total dos Insumos</td>
+            <td>R$ {{ total_insumos|floatformat:2 }}</td>
+          </tr>
+        </tfoot>
+      </table>
+      {% else %}
+      <p class="text-muted text-center">Nenhum ingrediente cadastrado para esta receita.</p>
+      {% endif %}
+
+      <!-- Modo de Preparo -->
+      <h6 class="text-uppercase mb-3 fw-bold" style="color: #000; font-size: 1.1rem;">Modo de Preparo</h6>
+      <ol class="list-group list-group-numbered">
+        {% for passo in receita.modo_preparo.splitlines %}
+        <li class="list-group-item border-0" style="color: #555;">{{ passo }}</li>
+        {% endfor %}
+      </ol>
+
+      <!-- Rendimento e Custos -->
+      <div class="row mt-4">
+        <div class="col-md-4">
+          <p><strong>Rendimento:</strong> {{ receita.rendimento|default:"20" }} porções</p>
+        </div>
+        <div class="col-md-4">
+          <p><strong>Custo Total:</strong> R$ {{ receita.custo_total|floatformat:2 }}</p>
+        </div>
+        <div class="col-md-4">
+          <p><strong>Custo/Porção:</strong> R$ {{ receita.custo_por_porcao|floatformat:2 }}</p>
+        </div>
+      </div>
+
+      <!-- Fornadas -->
+      <h6 class="text-uppercase mb-3 fw-bold" style="color: #000; font-size: 1.1rem;">Fornadas</h6>
+      {% if fornadas.exists %}
+      <table class="table table-bordered table-hover" style="color: #000; font-size: 0.95rem;">
+        <thead style="background: #28a745; color: #fff;">
+          <tr>
+            <th>Data de Produção</th>
+            <th>Quantidade Produzida</th>
+            <th>Produto Gerado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fornada in fornadas %}
+          <tr>
+            <td>{{ fornada.data_producao|date:"d/m/Y H:i" }}</td>
+            <td>{{ fornada.quantidade_produzida }}</td>
+            <td>{{ fornada.produto_gerado.nome|default:"N/A" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-muted text-center">Nenhuma fornada registrada para esta receita.</p>
+      {% endif %}
+    </div>
+    <div class="card-footer text-center" style="background: #fff; border-top: 1px solid #ddd;">
+      <p style="color: #555; font-size: 0.9rem;">FICHA TÉCNICA DE PREPARAÇÃO - BulgariaAju © 2025</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<style>
+  body, .form-label, .table {
+    font-family: "Roboto", sans-serif;
+  }
+  .table {
+    border: 1px solid #ddd;
+  }
+  .table thead th {
+    font-weight: 600;
+  }
+  .btn-sm {
+    font-size: 0.85rem;
+  }
+  @media (max-width: 768px) {
+    .row.align-items-center dt, .row.align-items-center dd {
+      margin-bottom: 10px;
+    }
+    .table {
+      font-size: 0.85rem;
+    }
+    .card-body .btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+</style>
+{% endblock %}

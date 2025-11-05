@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+{% load mathfilters %} <!-- Certifique-se de carregar mathfilters -->
+{% block content_title %}Detalhes da Compra{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+    <div class="card-header bg-gradient" style="background: linear-gradient(45deg, #dc3545, #e4606d); border-top-left-radius: 15px; border-top-right-radius: 15px;">
+      <h1 class="text-white m-0" style="font-size: 1.3rem; font-weight: 600; display: flex; align-items: center;">
+        <i class="bi bi-cart-check"></i> Detalhes da Compra
+      </h1>
+    </div>
+    <div class="card-body p-4">
+      <div class="row g-3">
+        <div class="col-12">
+          <p style="color: #000; font-size: 1rem; font-weight: 400;"><strong style="color: #000; font-size: 1.1rem; font-weight: 600;">Ingrediente:</strong> {{ compra.ingrediente.nome }}</p>
+        </div>
+        <div class="col-12 col-md-6">
+          <p style="color: #000; font-size: 1rem; font-weight: 400;"><strong style="color: #000; font-size: 1.1rem; font-weight: 600;">Quantidade:</strong>
+            {% with unidade=compra.ingrediente.unidade_medida %}
+              {% if compra.quantidade_comprada >= 1 %}
+                {{ compra.quantidade_comprada|floatformat:1 }} {{ unidade }}
+                {% with whole=compra.quantidade_comprada|floatformat:0 decimal=compra.quantidade_comprada|mul:10|mod:10|mul:100 %}
+                  {% if decimal > 0 %}
+                    ({{ whole }} {{ unidade }} e {{ decimal }} g)
+                  {% endif %}
+                {% endwith %}
+              {% else %}
+                {{ compra.quantidade_comprada|mul:1000|floatformat:0 }} g
+              {% endif %}
+            {% endwith %}
+          </p>
+        </div>
+        <div class="col-12 col-md-6">
+          <p style="color: #000; font-size: 1rem; font-weight: 400;"><strong style="color: #000; font-size: 1.1rem; font-weight: 600;">Valor Unitário:</strong> R$ {{ compra.valor_unitario|floatformat:2 }}</p>
+        </div>
+        <div class="col-12 col-md-6">
+          <p style="color: #000; font-size: 1rem; font-weight: 400;"><strong style="color: #000; font-size: 1.1rem; font-weight: 600;">Total:</strong> R$ {{ compra.quantidade_comprada|mul:compra.valor_unitario|floatformat:2 }}</p>
+        </div>
+        <div class="col-12 col-md-6">
+          <p style="color: #000; font-size: 1rem; font-weight: 400;"><strong style="color: #000; font-size: 1.1rem; font-weight: 600;">Data:</strong> {{ compra.data_compra|date:"d/m/Y" }}</p>
+        </div>
+        <div class="col-12 d-flex justify-content-end gap-3">
+          <a href="{% url 'financeiro:dashboard_financeiro' %}" class="btn btn-secondary" style="background: #6c757d; border: none; border-radius: 8px; padding: 10px 20px; color: #fff; transition: all 0.3s ease;">
+            <i class="bi bi-arrow-left"></i> Voltar
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

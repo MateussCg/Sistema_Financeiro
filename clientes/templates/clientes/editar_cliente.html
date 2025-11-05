@@ -1,0 +1,230 @@
+{% extends 'core/base.html' %}
+{% block content_title %}{{ content_title }}{% endblock %}
+{% block content %}
+<div class="container-fluid" style="width: 100%; padding-right: 0;">
+    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+        <div class="card-header bg-gradient" style="background: linear-gradient(45deg, #dc3545, #e4606d); border-top-left-radius: 15px; border-top-right-radius: 15px;">
+            <h5 class="text-white m-0" style="font-size: 1.3rem; font-weight: 600; display: flex; align-items: center;">
+                <i class="bi bi-pencil-square me-2"></i> {{ content_title }}
+            </h5>
+        </div>
+        <div class="card-body p-4" style="background: #fff; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert" style="color: #000; border-radius: 10px; font-size: 1rem; font-weight: 400;">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            <form method="post" class="row g-3">
+                {% csrf_token %}
+                <div class="col-12 col-md-6">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Nome</label>
+                    <input type="text" name="nome" value="{{ form.nome.value|default_if_none:'' }}" class="form-control" required style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Idade</label>
+                    <input type="number" name="idade" value="{{ form.idade.value|default_if_none:'' }}" class="form-control" required min="0" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">CPF (000.000.000-00)</label>
+                    <input type="text" name="cpf" value="{{ form.cpf.value|default_if_none:'' }}" class="form-control" required pattern="\d{3}\.\d{3}\.\d{3}-\d{2}" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Email</label>
+                    <input type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" class="form-control" required style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Número do Telefone</label>
+                    <input type="text" name="numero" value="{{ form.numero.value|default_if_none:'' }}" class="form-control" required style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">CEP</label>
+                    <input type="text" name="cep" value="{{ form.cep.value|default_if_none:'' }}" class="form-control" maxlength="9" placeholder="00000-000" id="cep-input" onkeyup="formatAndFetchCep(this)" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Endereço</label>
+                    <input type="text" name="endereco" value="{{ form.endereco.value|default_if_none:'' }}" class="form-control" readonly id="endereco" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Número (Endereço)</label>
+                    <input type="text" name="numero_endereco" value="{{ form.numero_endereco.value|default_if_none:'' }}" class="form-control" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-3">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Complemento</label>
+                    <input type="text" name="complemento" value="{{ form.complemento.value|default_if_none:'' }}" class="form-control" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Bairro</label>
+                    <input type="text" name="bairro" value="{{ form.bairro.value|default_if_none:'' }}" class="form-control" readonly id="bairro" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Cidade</label>
+                    <input type="text" name="cidade" value="{{ form.cidade.value|default_if_none:'' }}" class="form-control" readonly id="cidade" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Estado</label>
+                    <input type="text" name="estado" value="{{ form.estado.value|default_if_none:'' }}" class="form-control" readonly id="estado" style="color: #000; border-radius: 8px;">
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Preferências Alimentares</label>
+                    <textarea name="preferencias_alimentares" class="form-control" rows="3" style="color: #000; border-radius: 8px;">{{ form.preferencias_alimentares.value|default_if_none:'' }}</textarea>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Observações</label>
+                    <textarea name="observacoes" class="form-control" rows="3" style="color: #000; border-radius: 8px;">{{ form.observacoes.value|default_if_none:'' }}</textarea>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" style="color: #000; font-size: 1rem; font-weight: 500;">Intolerâncias</label>
+                    <div class="row row-cols-2 row-cols-md-3 g-2 mb-3" id="intolerancias-container">
+                        {% for intolerancia in intolerancias_comuns %}
+                        <div class="col">
+                            <div class="form-check custom-checkbox">
+                                <input type="checkbox" name="intolerancias" value="{{ intolerancia }}" class="form-check-input" id="intolerancia_{{ forloop.counter }}" {% if intolerancia in form.intolerancias.value %}checked{% endif %}>
+                                <label class="form-check-label" for="intolerancia_{{ forloop.counter }}" style="color: #000; font-weight: 500;">{{ intolerancia }}</label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div id="outra-intolerancia" style="display:none;">
+                        <label class="form-label mt-2" style="color: #000; font-size: 1rem; font-weight: 500;">Outra Intolerância</label>
+                        <input type="text" name="outra_intolerancia" value="{{ form.outra_intolerancia.value|default_if_none:'' }}" class="form-control" style="color: #000; border-radius: 8px;">
+                    </div>
+                    <button type="button" class="btn btn-custom-add p-2 mt-2" id="add-outra-intolerancia">
+                        <i class="bi bi-plus-circle"></i> Adicionar Outra Intolerância
+                    </button>
+                </div>
+                <div class="col-12 d-flex justify-content-end gap-3">
+                    <a href="{% url 'clientes:listar_clientes' %}" class="btn btn-secondary" style="background: #6c757d; border: none; border-radius: 8px; padding: 10px 20px; color: #fff; transition: all 0.3s ease;">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(45deg, #dc3545, #e4606d); border: none; border-radius: 8px; padding: 10px 20px; color: #fff; transition: all 0.3s ease;">
+                        <i class="bi bi-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<style>
+    .custom-checkbox .form-check-input {
+        border: 2px solid #dc3545;
+        border-radius: 4px;
+    }
+    .custom-checkbox .form-check-input:checked {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .custom-checkbox .form-check-label {
+        font-weight: 500;
+        color: #000;
+    }
+    .btn-custom-add {
+        color: #fff;
+        background: linear-gradient(45deg, #dc3545, #e4606d);
+        border: none;
+        border-radius: 8px;
+        padding: 8px 15px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+    .btn-custom-add i {
+        margin-right: 5px;
+    }
+    .btn-custom-add:hover {
+        background: linear-gradient(45deg, #b02a37, #c44d58);
+        transform: scale(1.05);
+    }
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #b02a37, #c44d58);
+        transform: translateY(-2px);
+    }
+    .form-control:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+    }
+    @media (max-width: 768px) {
+        .row.g-3 {
+            flex-direction: column;
+        }
+        .col-12 {
+            margin-bottom: 10px;
+        }
+        .btn {
+            width: 100%;
+            margin-top: 5px;
+        }
+    }
+</style>
+<script>
+    let debounceTimeout;
+    function formatAndFetchCep(input) {
+        let cep = input.value.replace(/\D/g, '');
+        if (cep.length > 5) {
+            cep = cep.slice(0, 5) + '-' + cep.slice(5, 8);
+        }
+        input.value = cep.slice(0, 9);
+
+        const cleanCep = input.value.replace('-', '');
+        if (cleanCep.length === 8 && /^\d{8}$/.test(cleanCep)) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = setTimeout(() => {
+                fetch(`https://viacep.com.br/ws/${cleanCep}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const enderecoInput = document.querySelector('input[name="endereco"]');
+                        const bairroInput = document.querySelector('input[name="bairro"]');
+                        const cidadeInput = document.querySelector('input[name="cidade"]');
+                        const estadoInput = document.querySelector('input[name="estado"]');
+                        if (!data.erro) {
+                            enderecoInput.value = data.logradouro || '';
+                            bairroInput.value = data.bairro || '';
+                            cidadeInput.value = data.localidade || '';
+                            estadoInput.value = data.uf || '';
+                            input.classList.remove('cep-error');
+                        } else {
+                            alert('CEP não encontrado!');
+                            enderecoInput.value = '';
+                            bairroInput.value = '';
+                            cidadeInput.value = '';
+                            estadoInput.value = '';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao buscar CEP:', error);
+                        alert('Erro ao consultar o CEP. Verifique a conexão ou tente novamente.');
+                    });
+            }, 500);
+        } else if (cleanCep.length !== 8) {
+            const enderecoInput = document.querySelector('input[name="endereco"]');
+            const bairroInput = document.querySelector('input[name="bairro"]');
+            const cidadeInput = document.querySelector('input[name="cidade"]');
+            const estadoInput = document.querySelector('input[name="estado"]');
+            enderecoInput.value = '';
+            bairroInput.value = '';
+            cidadeInput.value = '';
+            estadoInput.value = '';
+        }
+    }
+
+    document.getElementById('add-outra-intolerancia').addEventListener('click', function() {
+        const div = document.getElementById('outra-intolerancia');
+        const input = document.querySelector('input[name="outra_intolerancia"]');
+        if (div.style.display === 'none') {
+            div.style.display = 'block';
+            input.focus();
+        } else {
+            div.style.display = 'none';
+            input.value = '';
+        }
+    });
+</script>
+{% endblock %}

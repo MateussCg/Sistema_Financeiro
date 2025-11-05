@@ -1,0 +1,126 @@
+{% extends 'core/base.html' %}
+{% block content_title %}Dashboard ERP Padaria{% endblock %}
+{% block content %}
+<div class="container-fluid" style="width: 100%; padding-right: 0;">
+  <div class="row g-4">
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-header bg-gradient text-black" style="background: linear-gradient(45deg, #dc3545, #e4606d);">
+          <h5 class="mb-0" style="font-size: 1.2rem; font-weight: 600;">Ingredientes em Alerta</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text fw-bold" style="color: #000; font-size: 1.1rem; font-weight: 600;">Total: {{ ingredientes_alerta|length }}</p>
+          <div class="table-responsive">
+            <ul class="list-group list-group-flush">
+              {% for ingrediente in ingredientes_alerta %}
+              <li class="list-group-item" style="color: #000; font-size: 1rem; font-weight: 400; padding: 12px 15px;">{{ ingrediente.nome }} (Estoque: {{ ingrediente.quantidade_estoque }}/{{ ingrediente.quantidade_minima }})</li>
+              {% empty %}
+              <li class="list-group-item" style="color: #000; font-size: 1rem; font-weight: 400; padding: 12px 15px;">Nenhum ingrediente em alerta.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-header bg-gradient text-black" style="background: linear-gradient(45deg, #dc3545, #e4606d);">
+          <h5 class="mb-0" style="font-size: 1.2rem; font-weight: 600;">Últimas Fornadas</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text fw-bold" style="color: #000; font-size: 1.1rem; font-weight: 600;">Total: {{ ultimas_fornadas|length }}</p>
+          <div class="table-responsive">
+            <ul class="list-group list-group-flush">
+              {% for fornada in ultimas_fornadas %}
+              <li class="list-group-item" style="color: #000; font-size: 1rem; font-weight: 400; padding: 12px 15px;">{{ fornada.receita.nome }} - {{ fornada.data_producao|date:"d/m/Y" }}</li>
+              {% empty %}
+              <li class="list-group-item" style="color: #000; font-size: 1rem; font-weight: 400; padding: 12px 15px;">Nenhuma fornada recente.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 col-xl-3">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-header bg-gradient text-black" style="background: linear-gradient(45deg, #dc3545, #e4606d);">
+          <h5 class="mb-0" style="font-size: 1.2rem; font-weight: 600;">Estoque de Produtos</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text fw-bold" style="color: #000; font-size: 1.1rem; font-weight: 600;">Total: {{ produtos|length }}</p>
+          <div class="table-responsive">
+            <ul class="list-group list-group-flush">
+              {% for produto in produtos %}
+              <li class="list-group-item" style="color: #000; font-size: 1rem; font-weight: 400; padding: 12px 15px;">{{ produto.nome }} (Quantidade: {{ produto.quantidade }})</li>
+              {% empty %}
+              <li class="list-group-item" style="color: #000; font-size: 1rem; font-weight: 400; padding: 12px 15px;">Nenhum produto cadastrado.</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<style>
+  .card {
+    border-radius: 12px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+  .card-header {
+    font-size: 1.2rem;
+    padding: 15px;
+  }
+  .card-header h5 {
+    font-weight: 600;
+    margin: 0;
+  }
+  .card-body {
+    padding: 20px;
+  }
+  .list-group-item {
+    font-size: 1rem;
+    padding: 12px 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #000;
+    font-weight: 400;
+  }
+  .card-text {
+    color: #000;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  @media (min-width: 1600px) {
+    .card-header h5 {
+      font-size: 1.3rem;
+    }
+    .card-text {
+      font-size: 1.2rem;
+    }
+    .list-group-item {
+      font-size: 1.1rem;
+    }
+  }
+  @media (max-width: 768px) {
+    .card-header h5 {
+      font-size: 1.1rem;
+    }
+    .card-text {
+      font-size: 1rem;
+    }
+    .list-group-item {
+      font-size: 0.9rem;
+      padding: 10px 12px;
+    }
+  }
+
+</style>
+{% endblock %}

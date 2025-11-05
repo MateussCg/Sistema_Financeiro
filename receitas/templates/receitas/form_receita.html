@@ -1,0 +1,215 @@
+{% extends 'core/base.html' %}
+{% load widget_tweaks %}
+{% block content_title %}
+  {% if form.instance.pk %}Editar{% else %}Criar{% endif %} Receita
+{% endblock %}
+{% block content %}
+<div class="container-fluid" style="width: 100%; padding-right: 0">
+  <div class="card border-0 shadow-sm" style="border-radius: 0">
+    <div class="card-header bg-gradient d-flex justify-content-between align-items-center" style="background: linear-gradient(45deg, #dc3545, #e4606d); border-top-left-radius: 0; border-top-right-radius: 0">
+      <h5 class="text-white m-0" style="font-size: 1.3rem; font-weight: 600; display: flex; align-items: center">
+        <i class="bi bi-bookmark-plus me-2"></i> {{ block.super }}
+      </h5>
+      <a href="{% url 'receitas:listar_receitas' %}" class="btn btn-light btn-sm" style="color: #000; transition: all 0.3s ease">
+        <i class="bi bi-arrow-left"></i> Voltar
+      </a>
+    </div>
+    <div class="card-body p-4" style="background: #fff; border-bottom-left-radius: 0; border-bottom-right-radius: 0">
+      {% if messages %}
+      <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" style="color: #000; font-size: 1rem; font-weight: 400">
+        {% for message in messages %} {{ message }} {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      {% endif %}
+      <form method="post" id="receita-form" action="{% url 'receitas:criar_ou_editar_receita' receita.pk|default:'' %}" class="row g-3" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="col-12">
+          <div class="row g-3">
+            {% for field in form %}
+            <div class="col-12 {% if field.name == 'nome' or field.name == 'quantidade_produzida' %}col-md-6{% else %}col-md-12{% endif %}">
+              <label for="{{ field.id_for_label }}" class="form-label" style="color: #000; font-size: 1rem; font-weight: 500">{{ field.label }}</label>
+              {{ field|add_class:"form-control border-0 rounded-0 py-2" }}
+              {% if field.errors %}
+              <div class="text-danger small mt-1">{{ field.errors }}</div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <h6 class="text-muted mb-3" style="color: #000; font-size: 1.1rem; font-weight: 500">
+          Itens da Receita
+        </h6>
+        {{ formset.management_form }}
+        <div id="formset-container" class="formset-container">
+          {% for formset_form in formset %}
+          <div class="row mb-4 formset-item {% if formset_form.instance.pk or formset_form.has_changed %}border p-3 bg-light{% endif %}" data-form-index="{{ forloop.counter0 }}" style="border-radius: 0; transition: all 0.3s ease">
+            <div class="col-12">
+              <div class="row g-2 align-items-end">
+                {% for field in formset_form.visible_fields %}
+                <div class="col-12 col-md-4 mb-2">
+                  <label for="{{ field.id_for_label }}" class="form-label" style="color: #000; font-size: 1rem; font-weight: 500">{{ field.label }}</label>
+                  {{ field|add_class:"form-control border-0 rounded-0 py-2" }}
+                  {% if field.errors %}
+                  <div class="text-danger small mt-1">{{ field.errors }}</div>
+                  {% endif %}
+                </div>
+                {% endfor %}
+                {% if formset_form.instance.pk %}
+                <input type="hidden" name="{{ formset_form.prefix }}-id" value="{{ formset_form.instance.pk }}" />
+                {% endif %}
+                <div class="col-12 col-md-2 d-flex align-items-end mb-2">
+                  <button type="button" class="btn btn-danger btn-sm remove-item" style="color: #fff; background: #dc3545; border: none; padding: 6px 12px; border-radius: 0; transition: all 0.3s ease">
+                    <i class="bi bi-trash"></i> Remover
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm mb-3" id="add-item" style="color: #dc3545; border-color: #dc3545; padding: 6px 12px; border-radius: 0; transition: all 0.3s ease">
+          <i class="bi bi-plus-circle"></i> Adicionar Ingrediente
+        </button>
+        <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+          <a href="{% url 'receitas:listar_receitas' %}" class="btn btn-secondary rounded-0" style="background: #6c757d; border: none; padding: 10px 20px; color: #fff; transition: all 0.3s ease">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </a>
+          <button type="submit" class="btn btn-primary rounded-0" style="background: linear-gradient(45deg, #dc3545, #e4606d); border: none; padding: 10px 20px; color: #fff; transition: all 0.3s ease">
+            <i class="bi bi-save"></i> Salvar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const formsetContainer = document.getElementById("formset-container");
+    const addItemButton = document.getElementById("add-item");
+    const totalForms = document.querySelector("#id_itens-TOTAL_FORMS");
+    let formCount = parseInt(totalForms.value);
+
+    // Adicionar novo item com animação
+    addItemButton.addEventListener("click", function () {
+      const newForm = formsetContainer.firstElementChild.cloneNode(true);
+      newForm.classList.remove("border", "p-3", "bg-light");
+      newForm.setAttribute("data-form-index", formCount);
+      newForm.style.opacity = "0";
+      newForm.style.transform = "translateY(20px)";
+      setTimeout(() => {
+        newForm.style.transition = "all 0.3s ease";
+        newForm.style.opacity = "1";
+        newForm.style.transform = "translateY(0)";
+      }, 10);
+
+      newForm.querySelectorAll("input, select").forEach((input) => {
+        const name = input.name.replace(/itens-\d+-/, `itens-${formCount}-`);
+        const id = input.id.replace(/itens-\d+-/, `itens-${formCount}-`);
+        input.name = name;
+        input.id = id;
+        if (input.type !== "hidden" && !input.name.includes("-id"))
+          input.value = "";
+        if (input.tagName === "SELECT") input.selectedIndex = 0;
+      });
+      newForm.querySelector('input[name$="-id"]')?.remove();
+      formsetContainer.appendChild(newForm);
+      totalForms.value = formCount + 1;
+      formCount++;
+    });
+
+    // Remover item com animação
+    formsetContainer.addEventListener("click", function (e) {
+      if (e.target.closest(".remove-item")) {
+        const formItem = e.target.closest(".formset-item");
+        formItem.style.opacity = "0";
+        formItem.style.transform = "translateY(20px)";
+        setTimeout(() => {
+          formItem.remove();
+          const formItems = formsetContainer.querySelectorAll(".formset-item");
+          formItems.forEach((item, index) => {
+            item.setAttribute("data-form-index", index);
+            item.querySelectorAll("input, select").forEach((input) => {
+              const name = input.name.replace(/itens-\d+-/, `itens-${index}-`);
+              const id = input.id.replace(/itens-\d+-/, `itens-${index}-`);
+              input.name = name;
+              input.id = id;
+            });
+          });
+          totalForms.value = formItems.length;
+          formCount = formItems.length;
+        }, 300);
+      }
+    });
+
+    // Atualizar valor_unitario com base no ingrediente selecionado
+    formsetContainer.querySelectorAll('select[name$="-ingrediente"]').forEach(select => {
+      select.addEventListener('change', function () {
+        const formItem = this.closest('.formset-item');
+        const ingredienteId = this.value;
+        if (ingredienteId) {
+          fetch(`/api/ingrediente/${ingredienteId}/preco/`)
+            .then(response => response.json())
+            .then(data => {
+              const valorUnitarioInput = formItem.querySelector('input[name$="-valor_unitario"]');
+              if (valorUnitarioInput) {
+                valorUnitarioInput.value = data.preco_unitario || 0.00;
+              }
+            });
+        }
+      });
+    });
+  });
+</script>
+<style>
+  .form-control:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.6);
+    background-color: #fff;
+  }
+  .btn-outline-primary:hover {
+    background: linear-gradient(45deg, #b02a37, #c44d58);
+    color: #fff;
+    border-color: #b02a37;
+    transform: translateY(-2px);
+  }
+  .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+  }
+  .btn-primary:hover {
+    background: linear-gradient(45deg, #b02a37, #c44d58);
+    transform: translateY(-2px);
+  }
+  .btn-danger:hover {
+    background: #b02a37;
+    transform: translateY(-2px);
+  }
+  .formset-item {
+    transition: all 0.3s ease;
+  }
+  .formset-item.border {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+  }
+  .formset-container {
+    margin-bottom: 20px;
+  }
+  @media (max-width: 768px) {
+    .row.g-3 {
+      flex-direction: column;
+    }
+    .col-12 {
+      margin-bottom: 15px;
+    }
+    .card-body .btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .formset-item .col-md-4 {
+      margin-bottom: 10px;
+    }
+  }
+</style>
+{% endblock %}
